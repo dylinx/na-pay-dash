@@ -12,6 +12,7 @@ const router = createRouter({
       component: () => import('../views/Ecommerce.vue'),
       meta: {
         title: 'eCommerce Dashboard',
+        requiresAuth: true
       },
     },
     {
@@ -140,6 +141,30 @@ const router = createRouter({
         title: 'Signup',
       },
     },
+    {
+        path: '/auth/otp',
+        name: 'OtpVerify',
+        component: () => import('../views/Auth/OtpVerify.vue'),
+        meta: {
+            title: 'Two-Step Verification'
+        }
+    },
+    {
+        path: '/auth/forgot-password',
+        name: 'ForgotPassword',
+        component: () => import('../views/Auth/ForgotPassword.vue'),
+        meta: {
+            title: 'Forgot Password'
+        }
+    },
+    {
+        path: '/auth/reset-password',
+        name: 'ResetPassword',
+        component: () => import('../views/Auth/ResetPassword.vue'),
+        meta: {
+            title: 'Reset Password'
+        }
+    }
   ],
 })
 
@@ -147,5 +172,14 @@ export default router
 
 router.beforeEach((to, from, next) => {
   document.title = `Vue.js ${to.meta.title} | TailAdmin - Vue.js Tailwind CSS Dashboard Template`
-  next()
+  
+  const isAuthenticated = !!localStorage.getItem('npaccesstoken')
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next('/signin')
+  } else if ((to.path === '/signin' || to.path === '/signup' || to.path === '/auth/otp') && isAuthenticated) {
+     next('/')
+  } else {
+     next()
+  }
 })

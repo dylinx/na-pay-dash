@@ -220,7 +220,7 @@
                         </label>
                       </div>
                       <router-link
-                        to="/reset-password"
+                        to="/auth/forgot-password"
                         class="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
                         >Forgot password?</router-link
                       >
@@ -274,6 +274,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 const email = ref('')
@@ -281,16 +283,22 @@ const password = ref('')
 const showPassword = ref(false)
 const keepLoggedIn = ref(false)
 
+const router = useRouter()
+const authStore = useAuthStore()
+
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
 }
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   // Handle form submission
-  console.log('Form submitted', {
-    email: email.value,
-    password: password.value,
-    keepLoggedIn: keepLoggedIn.value,
-  })
+  try {
+    const otpToken = await authStore.login(email.value, password.value)
+    router.push({ path: '/auth/otp', query: { token: otpToken } })
+  } catch (error) {
+    console.error('Login failed:', error)
+    // Optional: Show error message to user
+    alert('Login failed. Please check your credentials.')
+  }
 }
 </script>

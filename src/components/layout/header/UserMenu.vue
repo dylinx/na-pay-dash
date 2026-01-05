@@ -61,6 +61,9 @@
 import { UserCircleIcon, ChevronDownIcon, LogoutIcon, SettingsIcon, InfoCircleIcon } from '@/icons'
 import { RouterLink } from 'vue-router'
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
@@ -80,10 +83,10 @@ const closeDropdown = () => {
 }
 
 const signOut = () => {
-  // Implement sign out logic here
-  console.log('Signing out...')
+  authStore.signOut()
   closeDropdown()
 }
+
 
 const handleClickOutside = (event) => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {

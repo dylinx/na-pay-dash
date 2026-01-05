@@ -7,13 +7,34 @@ import 'jsvectormap/dist/jsvectormap.css'
 import 'flatpickr/dist/flatpickr.css'
 
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+
 import App from './App.vue'
 import router from './router'
 import VueApexCharts from 'vue3-apexcharts'
+import axios from 'axios'
 
+axios.defaults.baseURL = 'https://napay.dylinx.com/v1'
+
+// Add global 401 interceptor
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('npaccesstoken')
+      // Use window.location as router might not be fully available or circular dependency
+      if (window.location.pathname !== '/signin') {
+        window.location.href = '/signin'
+      }
+    }
+    return Promise.reject(error)
+  }
+)
 const app = createApp(App)
 
+app.use(createPinia())
 app.use(router)
+app.use(axios)
 app.use(VueApexCharts)
 
 app.mount('#app')
