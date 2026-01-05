@@ -142,7 +142,7 @@ const router = createRouter({
       },
     },
     {
-        path: '/auth/otp',
+        path: '/otp',
         name: 'OtpVerify',
         component: () => import('../views/Auth/OtpVerify.vue'),
         meta: {
@@ -150,7 +150,7 @@ const router = createRouter({
         }
     },
     {
-        path: '/auth/forgot-password',
+        path: '/forgot-password',
         name: 'ForgotPassword',
         component: () => import('../views/Auth/ForgotPassword.vue'),
         meta: {
@@ -158,12 +158,16 @@ const router = createRouter({
         }
     },
     {
-        path: '/auth/reset-password',
+        path: '/reset-password',
         name: 'ResetPassword',
         component: () => import('../views/Auth/ResetPassword.vue'),
         meta: {
             title: 'Reset Password'
         }
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      component: () => import('../views/Errors/FourZeroFour.vue'),
     }
   ],
 })
@@ -177,7 +181,7 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiresAuth && !isAuthenticated) {
     next('/signin')
-  } else if ((to.path === '/signin' || to.path === '/signup' || to.path === '/auth/otp') && isAuthenticated) {
+  } else if ((to.path === '/signin' || to.path === '/signup' || to.path === '/otp') && isAuthenticated) {
      next('/')
   } else {
      next()

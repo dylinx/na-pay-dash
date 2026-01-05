@@ -127,8 +127,8 @@ const otpCode = ref('')
 const errorMessage = ref('')
 const resendMessage = ref('')
 const resendLoading = ref(false)
+const loading = ref(false)
 
-const loading = computed(() => authStore.loading)
 const token = computed(() => route.query.token as string)
 
 const handleVerify = async () => {
@@ -141,12 +141,15 @@ const handleVerify = async () => {
         errorMessage.value = 'Invalid session. Please sign in again.'
         return
     }
-
+    
+    loading.value = true
     try {
         await authStore.verifyOtp(token.value, otpCode.value)
         router.push('/')
+        // Keep loading true
     } catch (err: any) {
         errorMessage.value = err.message || 'Verification failed'
+        loading.value = false
     }
 }
 

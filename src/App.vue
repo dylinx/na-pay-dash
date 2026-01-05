@@ -19,10 +19,12 @@ const router = useRouter()
 onMounted(async () => {
     const isAuthenticated = await authStore.checkAuth()
     if (!isAuthenticated) {
-        router.push('/signin')
+        if (router.currentRoute.value.meta.requiresAuth) {
+            router.push('/signin')
+        }
     } else {
         // If we are at signin page but authenticated, go to dashboard
-        if (router.currentRoute.value.path === '/signin' || router.currentRoute.value.path === '/auth/otp') {
+        if (router.currentRoute.value.path === '/signin' || router.currentRoute.value.path === '/otp' || router.currentRoute.value.path === '/signup') {
             router.push('/')
         }
     }

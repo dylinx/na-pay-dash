@@ -220,7 +220,7 @@
                         </label>
                       </div>
                       <router-link
-                        to="/auth/forgot-password"
+                        to="/forgot-password"
                         class="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
                         >Forgot password?</router-link
                       >
@@ -229,9 +229,10 @@
                     <div>
                       <button
                         type="submit"
-                        class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600"
+                        :disabled="loading"
+                        class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Sign In
+                        {{ loading ? 'Signing in...' : 'Sign In' }}
                       </button>
                     </div>
                   </div>
@@ -282,6 +283,7 @@ const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const keepLoggedIn = ref(false)
+const loading = ref(false)
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -291,12 +293,16 @@ const togglePasswordVisibility = () => {
 }
 
 const handleSubmit = async () => {
-  // Handle form submission
+  if (loading.value) return
+  
+  loading.value = true
   try {
     const otpToken = await authStore.login(email.value, password.value)
-    router.push({ path: '/auth/otp', query: { token: otpToken } })
+    router.push({ path: '/otp', query: { token: otpToken } })
+    // Do not set loading = false here, keep it disabled until redirect completes
   } catch (error) {
     console.error('Login failed:', error)
+    loading.value = false
     // Optional: Show error message to user
     alert('Login failed. Please check your credentials.')
   }

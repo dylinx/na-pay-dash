@@ -157,12 +157,12 @@ const handleSubmit = async () => {
     try {
         const message = await authStore.resetPassword(token.value, password.value, confirmPassword.value)
         successMessage.value = message || 'Password reset successfully'
+        // Loading stays true during timeout and redirect
         setTimeout(() => {
             router.push('/signin')
         }, 2000)
     } catch (err: any) {
         errorMessage.value = err.message || 'Failed to reset password'
-    } finally {
         loading.value = false
     }
 }
