@@ -4,8 +4,9 @@ import router from '@/router'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    accessToken: localStorage.getItem('npaccesstoken') || null,
+    accessToken: localStorage.getItem('np_access') || null,
     user: null,
+    metaData: null,
     loading: false,
     error: null as string | null,
   }),
@@ -44,8 +45,24 @@ export const useAuthStore = defineStore('auth', {
 
             if (response.data.success) {
                 const accessToken = response.data.data.accessToken
+
                 this.accessToken = accessToken
-                localStorage.setItem('npaccesstoken', accessToken)
+                localStorage.setItem('np_access', accessToken)
+                localStorage.setItem('np_metadata', JSON.stringify({
+                    profile: {
+                        name: response.data.data.name,
+                        email: response.data.data.email,
+                        avatar: response.data.data.avatar ?? 'https://gravatar.com/avatar/8e5191909866e795a5f36d675f9f2fa3?s=400&d=robohash&r=x',
+                    },
+                    accounts: response.data.data.accounts,
+                    currentMid: response.data.data.defaultMid,
+                    currentMidName: response.data.data.defaultMname,
+                    currentMidLogo: response.data.data.defaultLogo,
+                    permissions: response.data.data.permissions,
+                    isAdmin: response.data.data.isAdmin,
+                    timezone: response.data.data.timezone,
+                }))
+
                 // Set default header for future requests
                 axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
                 return true
@@ -84,7 +101,7 @@ export const useAuthStore = defineStore('auth', {
             const response = await axios.get('/user-profile')
             this.user = response.data
             return true
-        } catch (error) {
+        } catch {
             // Note: Global interceptor might catch 401 first, but we handle the boolean return here
             this.logout()
             return false
@@ -143,7 +160,8 @@ export const useAuthStore = defineStore('auth', {
     logout() {
         this.accessToken = null
         this.user = null
-        localStorage.removeItem('npaccesstoken')
+        localStorage.removeItem('np_access')
+        localStorage.removeItem('np_metadata')
         delete axios.defaults.headers.common['Authorization']
         router.push('/signin')
     }

@@ -6,135 +6,138 @@
       <table class="min-w-full">
         <thead>
           <tr class="border-b border-gray-200 dark:border-gray-700">
-            <th class="px-5 py-3 text-left w-3/11 sm:px-6">
-              <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">User</p>
+            <th
+              v-for="col in columns"
+              :key="col.key"
+              class="px-5 py-3 text-left sm:px-6"
+              :class="col.class"
+            >
+              <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">
+                {{ col.header }}
+              </p>
             </th>
-            <th class="px-5 py-3 text-left w-2/11 sm:px-6">
-              <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Project Name</p>
-            </th>
-            <th class="px-5 py-3 text-left w-2/11 sm:px-6">
-              <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Team</p>
-            </th>
-            <th class="px-5 py-3 text-left w-2/11 sm:px-6">
-              <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Status</p>
-            </th>
-            <th class="px-5 py-3 text-left w-2/11 sm:px-6">
-              <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Budget</p>
+            <th v-if="actions && actions.length" class="px-5 py-3 text-left sm:px-6">
+              <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">
+                Actions
+              </p>
             </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
           <tr
-            v-for="(user, index) in users"
-            :key="index"
+            v-for="(row, rowIndex) in data"
+            :key="rowIndex"
             class="border-t border-gray-100 dark:border-gray-800"
           >
-            <td class="px-5 py-4 sm:px-6">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 overflow-hidden rounded-full">
-                  <img :src="user.avatar" :alt="user.name" />
+            <td
+              v-for="col in columns"
+              :key="col.key"
+              class="px-5 py-4 sm:px-6"
+              :class="col.rowClass"
+            >
+              <slot :name="col.key" :row="row">
+                <p class="text-gray-500 text-theme-sm dark:text-gray-400">
+                  {{ row[col.key] }}
+                </p>
+              </slot>
+            </td>
+            
+            <td v-if="actions && actions.length" class="px-5 py-4 sm:px-6">
+                <div class="flex items-center gap-2">
+                    <button
+                        v-for="(action, actionIndex) in actions"
+                        :key="actionIndex"
+                        @click="action.onClick(row)"
+                        class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        :class="action.className"
+                    >
+                        <component :is="action.icon" v-if="action.icon" class="w-5 h-5" />
+                        <span v-else>{{ action.label }}</span>
+                    </button>
                 </div>
-                <div>
-                  <span class="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                    {{ user.name }}
-                  </span>
-                  <span class="block text-gray-500 text-theme-xs dark:text-gray-400">
-                    {{ user.role }}
-                  </span>
-                </div>
-              </div>
-            </td>
-            <td class="px-5 py-4 sm:px-6">
-              <p class="text-gray-500 text-theme-sm dark:text-gray-400">{{ user.project }}</p>
-            </td>
-            <td class="px-5 py-4 sm:px-6">
-              <div class="flex -space-x-2">
-                <div
-                  v-for="(member, memberIndex) in user.team"
-                  :key="memberIndex"
-                  class="w-6 h-6 overflow-hidden border-2 border-white rounded-full dark:border-gray-900"
-                >
-                  <img :src="member" alt="team member" />
-                </div>
-              </div>
-            </td>
-            <td class="px-5 py-4 sm:px-6">
-              <span
-                :class="[
-                  'rounded-full px-2 py-0.5 text-theme-xs font-medium',
-                  {
-                    'bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-500':
-                      user.status === 'Active',
-                    'bg-warning-50 text-warning-700 dark:bg-warning-500/15 dark:text-warning-400':
-                      user.status === 'Pending',
-                    'bg-error-50 text-error-700 dark:bg-error-500/15 dark:text-error-500':
-                      user.status === 'Cancel',
-                  },
-                ]"
-              >
-                {{ user.status }}
-              </span>
-            </td>
-            <td class="px-5 py-4 sm:px-6">
-              <p class="text-gray-500 text-theme-sm dark:text-gray-400">{{ user.budget }}</p>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+    
+    <!-- Pagination -->
+    <div v-if="pagination" class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 dark:border-gray-800">
+      <div class="flex flex-1 justify-between sm:hidden">
+        <button
+          :disabled="!pagination.has_prev"
+          @click="$emit('pageChange', { cursor: pagination.prev_cursor, direction: 'prev' })"
+          class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+          :class="{ 'opacity-50 cursor-not-allowed': !pagination.has_prev }"
+        >
+          Previous
+        </button>
+        <button
+          :disabled="!pagination.has_next"
+          @click="$emit('pageChange', { cursor: pagination.next_cursor, direction: 'next' })"
+          class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+          :class="{ 'opacity-50 cursor-not-allowed': !pagination.has_next }"
+
+        >
+          Next
+        </button>
+      </div>
+      <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm text-gray-700 dark:text-gray-400">
+            Showing
+            <span class="font-medium">{{ pagination.limit }}</span>
+            results
+          </p>
+        </div>
+        <div>
+          <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+            <button
+                :disabled="!pagination.has_prev"
+                @click="$emit('pageChange', { cursor: pagination.prev_cursor, direction: 'prev' })"
+                class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 dark:ring-gray-700 dark:hover:bg-gray-700"
+                :class="{ 'opacity-50 cursor-not-allowed': !pagination.has_prev }"
+            >
+              <span class="sr-only">Previous</span>
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <button
+                :disabled="!pagination.has_next"
+                @click="$emit('pageChange', { cursor: pagination.next_cursor, direction: 'next' })"
+                class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 dark:ring-gray-700 dark:hover:bg-gray-700"
+                :class="{ 'opacity-50 cursor-not-allowed': !pagination.has_next }"
+            >
+              <span class="sr-only">Next</span>
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
 
-const users = ref([
-  {
-    name: 'Lindsey Curtis',
-    role: 'Web Designer',
-    avatar: '/images/user/user-17.jpg',
-    project: 'Agency Website',
-    team: ['/images/user/user-22.jpg', '/images/user/user-23.jpg', '/images/user/user-24.jpg'],
-    status: 'Active',
-    budget: '3.9K',
-  },
-  {
-    name: 'Kaiya George',
-    role: 'Project Manager',
-    avatar: '/images/user/user-18.jpg',
-    project: 'Technology',
-    team: ['/images/user/user-25.jpg', '/images/user/user-26.jpg'],
-    status: 'Pending',
-    budget: '24.9K',
-  },
-  {
-    name: 'Zain Geidt',
-    role: 'Content Writer',
-    avatar: '/images/user/user-19.jpg',
-    project: 'Blog Writing',
-    team: ['/images/user/user-27.jpg'],
-    status: 'Active',
-    budget: '12.7K',
-  },
-  {
-    name: 'Abram Schleifer',
-    role: 'Digital Marketer',
-    avatar: '/images/user/user-20.jpg',
-    project: 'Social Media',
-    team: ['/images/user/user-28.jpg', '/images/user/user-29.jpg', '/images/user/user-30.jpg'],
-    status: 'Cancel',
-    budget: '2.8K',
-  },
-  {
-    name: 'Carla George',
-    role: 'Front-end Developer',
-    avatar: '/images/user/user-21.jpg',
-    project: 'Website',
-    team: ['/images/user/user-31.jpg', '/images/user/user-32.jpg', '/images/user/user-33.jpg'],
-    status: 'Active',
-    budget: '4.5K',
-  },
-])
+
+const props = defineProps<{
+  columns: { header: string; key: string; class?: string; rowClass?: string }[];
+  data: any[];
+  actions?: { label: string; onClick: (row: any) => void; icon?: any; className?: string }[];
+  pagination?: {
+      has_next: boolean;
+      has_prev: boolean;
+      next_cursor: number | string | null;
+      prev_cursor: number | string | null;
+      limit: number;
+  };
+}>()
+
+defineEmits(['pageChange'])
 </script>
 
 <style scoped>
