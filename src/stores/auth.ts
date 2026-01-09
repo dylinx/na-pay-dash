@@ -5,8 +5,15 @@ import router from '@/router'
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     accessToken: localStorage.getItem('np_access') || null,
-    user: null,
-    metaData: null,
+    user: ((): any => {
+        const meta = localStorage.getItem('np_metadata')
+        if (meta) {
+            const parsed = JSON.parse(meta)
+            return { data: parsed.profile } // Wrap in data to match API response structure
+        }
+        return null
+    })(),
+    metaData: JSON.parse(localStorage.getItem('np_metadata') || 'null'),
     loading: false,
     error: null as string | null,
   }),

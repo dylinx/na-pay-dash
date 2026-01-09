@@ -2,10 +2,10 @@
   <AdminLayout>
     <PageBreadcrumb :pageTitle="currentPageTitle" />
     <div class="space-y-5 sm:space-y-6">
-      <ComponentCard title="Roles">
+      <ComponentCard title="Roles" desc="Group permissions under one role and easily assign users" @search="handleSearch">
         <template #actions>
           <button 
-            @click="isDrawerOpen = true"
+            @click="handleAddClick"
             class="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-white hover:bg-brand-600"
           >
             <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -15,22 +15,83 @@
             Add Role
           </button>
         </template>
+
+        <div v-if="tableSuccessMessage || tableError" class="mb-6">
+          <Alert
+            v-if="tableSuccessMessage"
+            variant="success"
+            title="Success"
+            :message="tableSuccessMessage"
+          />
+          <Alert
+            v-if="tableError"
+            variant="error"
+            title="Error"
+            :message="tableError"
+          />
+        </div>
+
+        <TableSkeleton 
+          v-if="roleStore.loading && !roleStore.roles.length" 
+          :columnCount="3" 
+          :rowCount="5" 
+        />
+
         <BasicTableOne
+          v-else
           :columns="columns"
           :data="roleStore.roles"
           :pagination="roleStore.pagination"
+          :actions="tableActions"
           @pageChange="handlePageChange"
-        />
+        >
+          <template #permissions="{ row }">
+            <div class="flex flex-wrap gap-1.5 max-w-[300px]">
+              <Badge
+                v-for="permission in row.permissions.slice(0, 3)"
+                :key="permission"
+                variant="light"
+                color="primary"
+                size="sm"
+              >
+                {{ permission }}
+              </Badge>
+              <Badge
+                v-if="row.permissions.length > 3"
+                variant="light"
+                color="light"
+                size="sm"
+              >
+                +{{ row.permissions.length - 3 }} more
+              </Badge>
+            </div>
+          </template>
+        </BasicTableOne>
       </ComponentCard>
     </div>
 
-    <!-- Add Role Drawer -->
+    <!-- Add/Edit Role Drawer -->
     <RightDrawer
       :isOpen="isDrawerOpen"
-      title="Create New Role"
-      @close="isDrawerOpen = false"
+      :title="isEditing ? 'Update Role' : 'Create New Role'"
+      @close="closeDrawer"
     >
-      <form @submit.prevent="handleCreateRole" class="space-y-6">
+      <div v-if="drawerSuccessMessage || drawerError" class="mb-6">
+        <Alert
+          v-if="drawerSuccessMessage"
+          variant="success"
+          title="Success"
+          :message="drawerSuccessMessage"
+        />
+        <Alert
+          v-if="drawerError"
+          variant="error"
+          title="Error"
+          :message="drawerError"
+        />
+      </div>
+
+      <form @submit.prevent="handleFormSubmit" class="space-y-6">
         <div>
           <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
             Role Name
@@ -41,6 +102,7 @@
             placeholder="e.g. Admin, Editor"
             class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
             required
+            :disabled="roleStore.loading"
           />
         </div>
 
@@ -53,6 +115,7 @@
             placeholder="Enter role description..."
             rows="4"
             class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+            :disabled="roleStore.loading"
           ></textarea>
         </div>
 
@@ -62,7 +125,8 @@
           </label>
           <MultipleSelect
             v-model="form.permissions"
-            :options="permissionOptions"
+            :options="roleStore.permissions"
+            :disabled="roleStore.loading"
           />
         </div>
       </form>
@@ -71,17 +135,22 @@
         <div class="flex items-center justify-end gap-3">
             <button
                 type="button"
-                @click="isDrawerOpen = false"
+                @click="closeDrawer"
                 class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
             >
                 Cancel
             </button>
             <button
                 type="submit"
-                @click="handleCreateRole"
-                class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
+                @click="handleFormSubmit"
+                :disabled="roleStore.loading"
+                class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-                Create Role
+                <svg v-if="roleStore.loading" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ roleStore.loading ? (isEditing ? 'Updating...' : 'Creating...') : (isEditing ? 'Update Role' : 'Create Role') }}
             </button>
         </div>
       </template>
@@ -97,11 +166,26 @@ import ComponentCard from "@/components/common/ComponentCard.vue";
 import BasicTableOne from "@/components/tables/basic-tables/BasicTableOne.vue";
 import RightDrawer from "@/components/common/RightDrawer.vue";
 import MultipleSelect from "@/components/forms/FormElements/MultipleSelect.vue";
+import TableSkeleton from "@/components/ui/TableSkeleton.vue";
+import Alert from "@/components/ui/Alert.vue";
+import Badge from "@/components/ui/Badge.vue";
+import { HorizontalDots, TrashIcon } from "@/icons";
 import { useUserRoleStore } from "@/stores/user_role";
 
 const currentPageTitle = ref("Roles");
 const roleStore = useUserRoleStore();
 const isDrawerOpen = ref(false);
+const isEditing = ref(false);
+const currentRoleId = ref("");
+
+// Alert states
+const tableSuccessMessage = ref("");
+const tableError = ref("");
+const drawerSuccessMessage = ref("");
+const drawerError = ref("");
+
+const searchQuery = ref("");
+let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const form = reactive({
     name: '',
@@ -109,25 +193,38 @@ const form = reactive({
     permissions: [] as { label: string, value: string }[]
 });
 
-const permissionOptions = [
-    { label: "View Collections", value: "collections:view" },
-    { label: "Initiate Refunds", value: "collections-refund:initiate" },
-    { label: "Approve Refunds", value: "collections-refund:approve" },
-    { label: "View Disbursements", value: "disbursements:view" },
-    { label: "Approve Disbursements", value: "disbursements:approve" },
-    { label: "Manage Users", value: "users:crud" },
-    { label: "Manage Account Configs", value: "account-configs:crud" },
-];
-
 const columns = [
     { header: "Name", key: "name" },
     { header: "Description", key: "description" },
-    { header: "Created At", key: "createdAt" },
+    { header: "Permissions", key: "permissions" },
+];
+
+const tableActions = [
+    {
+        label: "Edit",
+        icon: HorizontalDots,
+        onClick: (row: any) => handleEditClick(row),
+    },
+    {
+        label: "Delete",
+        icon: TrashIcon,
+        onClick: (row: any) => handleDeleteClick(row),
+    }
 ];
 
 onMounted(() => {
-    roleStore.getRoles();
+    fetchRoles();
+    roleStore.getPermissions();
 });
+
+const fetchRoles = (params: any = {}) => {
+    const queryParams = {
+        ...params,
+        qr: searchQuery.value || undefined
+    };
+    console.log(queryParams);
+    roleStore.getRoles(queryParams);
+};
 
 const handlePageChange = ({ cursor, direction }: { cursor: string | number, direction: string }) => {
     const params: any = {};
@@ -135,16 +232,103 @@ const handlePageChange = ({ cursor, direction }: { cursor: string | number, dire
         params.lastSeenId = cursor;
     }
     params.direction = direction;
-    roleStore.getRoles(params);
+    fetchRoles(params);
 };
 
-const handleCreateRole = async () => {
-    console.log("Creating role:", form);
-    // Add API call here via store
-    isDrawerOpen.value = false;
-    // Reset form
+const handleSearch = (query: string) => {
+    searchQuery.value = query;
+    if (searchTimeout) {
+        clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+        fetchRoles();
+    }, 500); // 500ms delay for debouncing
+};
+
+const handleAddClick = () => {
+    isEditing.value = false;
+    currentRoleId.value = "";
+    resetForm();
+    isDrawerOpen.value = true;
+};
+
+const handleEditClick = (row: { name: string, roleId: string, description: string, permissions: string[] }) => {
+    isEditing.value = true;
+    currentRoleId.value = row.roleId;
+    form.name = row.name;
+    form.description = row.description || "";
+    form.permissions = row.permissions.map((p: string) => ({
+        label: p,
+        value: p
+    }));
+    isDrawerOpen.value = true;
+};
+
+const handleDeleteClick = async (row: { name: string, roleId: string }) => {
+    if (confirm(`Are you sure you want to delete the role "${row.name}"?`)) {
+        tableSuccessMessage.value = "";
+        tableError.value = "";
+        try {
+            const message = await roleStore.deleteRole(row.roleId);
+            tableSuccessMessage.value = message || "Role deleted successfully!";
+            fetchRoles();
+            
+            setTimeout(() => {
+                tableSuccessMessage.value = "";
+            }, 5000);
+        } catch (err: any) {
+            tableError.value = err.response?.data?.error?.message || err.message || "Failed to delete role";
+            console.error("Failed to delete role:", err);
+        }
+    }
+};
+
+const resetForm = () => {
     form.name = '';
     form.description = '';
     form.permissions = [];
+    drawerSuccessMessage.value = "";
+    drawerError.value = "";
+    tableSuccessMessage.value = "";
+    tableError.value = "";
+    roleStore.error = null;
+};
+
+const closeDrawer = () => {
+    isDrawerOpen.value = false;
+    resetForm();
+};
+
+const handleFormSubmit = async () => {
+    if (roleStore.loading) return;
+    
+    drawerSuccessMessage.value = "";
+    drawerError.value = "";
+    roleStore.error = null;
+
+    try {
+        const permissionNames = form.permissions.map(p => p.value);
+        if (isEditing.value) {
+            await roleStore.updateRole(currentRoleId.value, form.name, form.description, permissionNames);
+            drawerSuccessMessage.value = "Role updated successfully!";
+        } else {
+            await roleStore.createRole(form.name, form.description, permissionNames);
+            resetForm();
+            drawerSuccessMessage.value = "Role created successfully!";
+        }
+        
+        // Refresh the list
+        fetchRoles();
+
+        if (!isEditing.value) {
+            // Hide success message after 5 seconds for creation
+            setTimeout(() => {
+                drawerSuccessMessage.value = "";
+            }, 5000);
+        }
+    } catch (err: any) {
+        drawerError.value = err.response?.data?.error?.message || err.response?.data?.message || err.message || "Failed to process role";
+        console.error("Failed to process role:", err);
+    }
 };
 </script>

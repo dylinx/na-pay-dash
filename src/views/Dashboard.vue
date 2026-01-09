@@ -13,13 +13,13 @@
         <statistics-chart />
       </div>
 
-      <div class="col-span-12 xl:col-span-5">
+      <!-- <div class="col-span-12 xl:col-span-5">
         <customer-demographic />
       </div>
 
       <div class="col-span-12 xl:col-span-7">
         <recent-orders />
-      </div>
+      </div> -->
     </div>
   </admin-layout>
 </template>
