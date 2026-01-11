@@ -47,6 +47,14 @@ const router = createRouter({
             title: 'Reset Password'
         }
     },
+    {
+        path: '/verify-email',
+        name: 'VerifyEmail',
+        component: () => import('../views/Auth/VerifyEmail.vue'),
+        meta: {
+            title: 'Verify Email'
+        }
+    },
 
     // Dashboard Routes
 

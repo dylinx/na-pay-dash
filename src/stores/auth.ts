@@ -59,7 +59,7 @@ export const useAuthStore = defineStore('auth', {
                     profile: {
                         name: response.data.data.name,
                         email: response.data.data.email,
-                        avatar: response.data.data.avatar ?? 'https://gravatar.com/avatar/8e5191909866e795a5f36d675f9f2fa3?s=400&d=robohash&r=x',
+                        avatar: response.data.data.avatar ?? '/images/user/robot.png',
                     },
                     accounts: response.data.data.accounts,
                     currentMid: response.data.data.defaultMid,
@@ -105,8 +105,18 @@ export const useAuthStore = defineStore('auth', {
             // Ensure header is set if we have a token from localStorage but verified later
             axios.defaults.headers.common['Authorization'] = `Bearer ${this.accessToken}`
             
-            const response = await axios.get('/user-profile')
-            this.user = response.data
+            await axios.get('/user-profile')
+            
+            // // Handle different API response structures and preserve existing data if needed
+            // const freshData = response.data.data || response.data
+            // const existingAvatar = this.user?.data?.avatar || this.metaData?.profile?.avatar
+            
+            // if (!freshData.avatar && existingAvatar) {
+            //     freshData.avatar = existingAvatar
+            // }
+            
+            // // Ensure we always have the { data: { ... } } structure for consistency
+            // this.user = response.data.data ? response.data : { data: freshData }
             return true
         } catch {
             // Note: Global interceptor might catch 401 first, but we handle the boolean return here
@@ -159,6 +169,27 @@ export const useAuthStore = defineStore('auth', {
         } catch (err: any) {
              this.error = err.response?.data?.error?.message || err.message || 'Failed to reset password'
              throw err
+        } finally {
+            this.loading = false
+        }
+    },
+
+    async verifyEmail(token: string, password: string, confirmPassword: string) {
+        this.loading = true
+        this.error = null
+        try {
+            const response = await axios.post(`/verify-email?token=${token}`, {
+                password,
+                confirmPassword
+            })
+            if (response.data.success) {
+                return response.data.data.message
+            } else {
+                throw new Error(response.data.error?.message || response.data.message || 'Verification failed')
+            }
+        } catch (err: any) {
+            this.error = err.response?.data?.error?.message || err.message || 'Failed to verify email'
+            throw err
         } finally {
             this.loading = false
         }

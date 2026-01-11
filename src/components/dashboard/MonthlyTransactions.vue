@@ -3,11 +3,11 @@
     class="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6"
   >
     <div class="flex items-center justify-between">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">Monthly Sales</h3>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">Monthly Collections</h3>
 
       <div class="relative h-fit">
         <DropdownMenu :menu-items="menuItems">
-          <template #icon>
+          <template>
             <svg
               width="24"
               height="24"
@@ -35,20 +35,28 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, computed } from 'vue'
 import DropdownMenu from '../common/DropdownMenu.vue'
+import VueApexCharts from 'vue3-apexcharts'
+
+interface Props {
+  graphData: Record<string, number>
+}
+
+const props = defineProps<Props>()
+
 const menuItems = [
   { label: 'View More', onClick: () => console.log('View More clicked') },
   { label: 'Delete', onClick: () => console.log('Delete clicked') },
 ]
 
-import VueApexCharts from 'vue3-apexcharts'
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-const series = ref([
+const series = computed(() => [
   {
-    name: 'Sales',
-    data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112],
+    name: 'Collections',
+    data: months.map(month => props.graphData[month] || 0),
   },
 ])
 
@@ -78,20 +86,7 @@ const chartOptions = ref({
     colors: ['transparent'],
   },
   xaxis: {
-    categories: [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ],
+    categories: months,
     axisBorder: {
       show: false,
     },
@@ -126,14 +121,10 @@ const chartOptions = ref({
       show: false,
     },
     y: {
-      formatter: function (val) {
+      formatter: function (val: number) {
         return val.toString()
       },
     },
   },
-})
-
-onMounted(() => {
-  // Any additional setup can be done here if needed
 })
 </script>

@@ -5,7 +5,7 @@
       @click.prevent="toggleDropdown"
     >
       <span class="mr-3 overflow-hidden rounded-full h-11 w-11">
-        <img :src="authStore.user?.data?.avatar" alt="User" />
+        <img :src="avatar" alt="User" />
       </span>
 
       <span class="block mr-1 font-medium text-theme-sm">{{ firstName }} </span>
@@ -70,8 +70,12 @@ const dropdownRef = ref(null)
 
 const firstName = computed(() => {
   const full_name = authStore.user?.data?.name
-  const avatar = authStore.user?.data?.avatar || '/images/user/owner.jpg'
   return full_name ? full_name.split(' ')[0] : 'User'
+})
+
+const avatar = computed(() => {
+  const avatar = authStore.user?.data?.avatar || '/images/user/robot.png'
+  return avatar
 })
 
 const menuItems = [
