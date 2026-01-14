@@ -1,0 +1,32 @@
+<svg width="32" height="32" viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="n_grad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38D0B7"/>
+      <stop offset="45%" stop-color="#4A4FD9"/>
+      <stop offset="100%" stop-color="#A033C4"/>
+    </linearGradient>
+
+    <linearGradient id="dot_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFCE4A"/>
+      <stop offset="100%" stop-color="#F9A620"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Stylized N -->
+  <path
+    d="M35 115
+       V45
+       C35 25 55 25 55 45
+       V90
+       C55 110 75 110 75 90
+       V45"
+    fill="none"
+    stroke="url(#n_grad)"
+    stroke-width="18"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Dot -->
+  <circle cx="88" cy="22" r="9" fill="url(#dot_grad)" />
+</svg>
