@@ -323,7 +323,7 @@ import Badge from "@/components/ui/Badge.vue";
 import TableSkeleton from "@/components/ui/TableSkeleton.vue";
 import flatPickr from 'vue-flatpickr-component'
 import 'flatpickr/dist/flatpickr.css'
-import { HorizontalDots, TrashIcon, ArrowsPointOutIcon } from "@/icons";
+import { HorizontalDots } from "@/icons";
 import { useCollectionStore } from "@/stores/collection";
 
 const currentPageTitle = ref("Collections");

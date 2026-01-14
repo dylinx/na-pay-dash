@@ -13,6 +13,14 @@ export const useAuthStore = defineStore('auth', {
         }
         return null
     })(),
+    currentAccount: ((): any => {
+        const meta = localStorage.getItem('np_metadata')
+        if (meta) {
+            const parsed = JSON.parse(meta)
+            return { data: {name: parsed.currentMidName, logo: parsed.currentMidLogo, mid: parsed.currentMid, country: parsed.currentMidCountry} } // Wrap in data to match API response structure
+        }
+        return null
+    })(),
     metaData: JSON.parse(localStorage.getItem('np_metadata') || 'null'),
     loading: false,
     error: null as string | null,
@@ -87,12 +95,13 @@ export const useAuthStore = defineStore('auth', {
                     profile: {
                         name: response.data.data.name,
                         email: response.data.data.email,
-                        avatar: response.data.data.avatar ?? '/images/user/robot.png',
+                        avatar: response.data.data.avatar,
                     },
                     accounts: response.data.data.accounts,
                     currentMid: response.data.data.defaultMid,
                     currentMidName: response.data.data.defaultMname,
                     currentMidLogo: response.data.data.defaultLogo,
+                    currentMidCountry: response.data.data?.defaultCountry ?? 'KE',
                     permissions: response.data.data.permissions,
                     isAdmin: response.data.data.isAdmin,
                     timezone: response.data.data.timezone,
@@ -133,20 +142,27 @@ export const useAuthStore = defineStore('auth', {
             // Ensure header is set if we have a token from localStorage but verified later
             axios.defaults.headers.common['Authorization'] = `Bearer ${this.accessToken}`
             
-            await axios.get('/user-profile')
+            const response = await axios.get('/user-profile')
             
-            // // Handle different API response structures and preserve existing data if needed
-            // const freshData = response.data.data || response.data
-            // const existingAvatar = this.user?.data?.avatar || this.metaData?.profile?.avatar
+            // Handle different API response structures and preserve existing data if needed
+            const freshData = response.data.data || response.data
             
-            // if (!freshData.avatar && existingAvatar) {
-            //     freshData.avatar = existingAvatar
-            // }
+            // Ensure we always have the { data: { ... } } structure for consistency
+            this.user = { data: freshData }
+
+            // Sync back to localStorage metaData
+            const currentMeta = JSON.parse(localStorage.getItem('np_metadata') || '{}')
+            currentMeta.profile = {
+                name: freshData.name,
+                email: freshData.email,
+                avatar: freshData.avatar ?? currentMeta.profile?.avatar ?? '/images/user/robot.png',
+            }
+            localStorage.setItem('np_metadata', JSON.stringify(currentMeta))
+            this.metaData = currentMeta
             
-            // // Ensure we always have the { data: { ... } } structure for consistency
-            // this.user = response.data.data ? response.data : { data: freshData }
             return true
-        } catch {
+        } catch (error) {
+            console.error('Auth check failed:', error)
             // Note: Global interceptor might catch 401 first, but we handle the boolean return here
             this.logout()
             return false

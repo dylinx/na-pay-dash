@@ -5,7 +5,7 @@
       @click.prevent="toggleDropdown"
     >
       <span class="mr-3 overflow-hidden rounded-full h-11 w-11">
-        <img :src="avatar" alt="User" />
+        <img :src="'/images/user/robot.png'" alt="User" />
       </span>
 
       <span class="block mr-1 font-medium text-theme-sm">{{ firstName }} </span>
@@ -74,14 +74,14 @@ const firstName = computed(() => {
 })
 
 const avatar = computed(() => {
-  const avatar = authStore.user?.data?.avatar || '/images/user/robot.png'
+  const avatar = authStore.user?.data?.avatar
   return avatar
 })
 
 const menuItems = [
   { href: '/profile', icon: UserCircleIcon, text: 'Edit profile' },
-  { href: '/chat', icon: SettingsIcon, text: 'Account settings' },
-  { href: '/profile', icon: InfoCircleIcon, text: 'Support' },
+  { href: '/account-settings', icon: SettingsIcon, text: 'Account settings' },
+  // { href: '/profile', icon: InfoCircleIcon, text: 'Support' },
 ]
 
 const toggleDropdown = () => {

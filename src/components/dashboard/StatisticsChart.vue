@@ -29,15 +29,15 @@
       </div>
     </div>
     <div class="max-w-full overflow-x-auto custom-scrollbar">
-      <div id="chartThree" class="-ml-4 min-w-[1000px] xl:min-w-full pl-2">
-        <VueApexCharts type="area" height="310" :options="chartOptions" :series="series" />
+      <div class="-ml-4 min-w-[1000px] xl:min-w-full pl-2">
+        <VueApexCharts v-if="isMounted" type="area" height="310" :options="chartOptions" :series="series" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const options = [
   { value: 'optionOne', label: 'Monthly' },
@@ -47,6 +47,11 @@ const options = [
 
 const selected = ref('optionOne')
 import VueApexCharts from 'vue3-apexcharts'
+
+const isMounted = ref(false)
+onMounted(() => {
+  isMounted.value = true
+})
 
 const series = ref([
   {

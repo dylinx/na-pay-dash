@@ -2,7 +2,7 @@
   <AdminLayout>
     <PageBreadcrumb :pageTitle="currentPageTitle" />
     <div class="space-y-5 sm:space-y-6">
-      <ComponentCard title="Roles" desc="Group permissions under one role and easily assign users" @search="handleSearch">
+      <ComponentCard title="User Activities" desc="List of all user activities" @search="handleSearch">
 
         <TableSkeleton 
           v-if="activityStore.loading && !activityStore.activities.length" 
@@ -32,14 +32,13 @@ import BasicTableOne from "@/components/tables/basic-tables/BasicTableOne.vue";
 import TableSkeleton from "@/components/ui/TableSkeleton.vue";
 import { useUserRoleStore } from "@/stores/user_role";
 
-const currentPageTitle = ref("Roles");
+const currentPageTitle = ref("User Activities");
 const activityStore = useUserRoleStore();
 const searchQuery = ref("");
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const columns = [
     { header: "Activity", key: "action" },
-    { header: "User", key: "user" },
     { header: "IP Address", key: "ip" },
     { header: "Date", key: "createdAt" },
 ];

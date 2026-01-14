@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-full overflow-x-auto custom-scrollbar">
-    <div id="chartThree" class="-ml-4 min-w-[1000px] xl:min-w-full pl-2">
+    <div class="-ml-4 min-w-[1000px] xl:min-w-full pl-2">
       <VueApexCharts type="area" height="310" :options="chartOptions" :series="series" />
     </div>
   </div>

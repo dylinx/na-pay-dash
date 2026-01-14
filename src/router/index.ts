@@ -78,6 +78,16 @@ const router = createRouter({
       },
     },
 
+    {
+      path: '/account-settings',
+      name: 'AccountSettings',
+      component: () => import('../views/Others/AccountSettings.vue'),
+      meta: {
+        title: 'Account Settings',
+        requiresAuth: true
+      },
+    },
+
     // Collection Routes
 
     {
@@ -209,7 +219,7 @@ const router = createRouter({
 export default router
 
 router.beforeEach((to, from, next) => {
-  document.title = `Vue.js ${to.meta.title} | TailAdmin - Vue.js Tailwind CSS Dashboard Template`
+  document.title = `NaPay ${to.meta.title}`
   
   const isAuthenticated = !!localStorage.getItem('np_access')
 
