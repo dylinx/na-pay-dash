@@ -49,6 +49,7 @@ import ArrowDownLeftIcon from "./ArrowDownLeftIcon.vue";
 import ArrowsPointInIcon from "./ArrowsPointInIcon.vue";
 import ArrowsPointOutIcon from "./ArrowsPointOutIcon.vue";
 import LinkIcon from "./LinkIcon.vue";
+import ChevronUpDownIcon from "./ChevronUpDownIcon.vue";
 
 export {
   BellIcon,
@@ -102,4 +103,5 @@ export {
   ArrowsPointInIcon,
   ArrowsPointOutIcon,
   LinkIcon,
+  ChevronUpDownIcon,
 };

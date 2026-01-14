@@ -222,7 +222,6 @@ const fetchRoles = (params: any = {}) => {
         ...params,
         qr: searchQuery.value || undefined
     };
-    console.log(queryParams);
     roleStore.getRoles(queryParams);
 };
 

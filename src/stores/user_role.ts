@@ -7,6 +7,7 @@ export const useUserRoleStore = defineStore('userRole', {
         users: [],
         permissions: [],
         rolesSelect: [] as { label: string, value: string, disabled?: boolean }[],
+        activities: [],
         loading: false,
         error: null as string | null,
         mid: JSON.parse(localStorage.getItem('np_metadata') || '{}').currentMid,
@@ -191,5 +192,33 @@ export const useUserRoleStore = defineStore('userRole', {
                 this.loading = false
             }
         },
+
+        async getUserActivities(params: {
+            direction?: string,
+            limit?: number,
+            lastSeenId?: string | number,
+            format?: string,
+            qr?: string
+        } = {}) {
+            this.loading = true
+            this.error = null
+            try {
+                const response = await axios.get(`${this.mid}/activities`, { params })
+                this.activities = response.data.data.data
+                this.pagination = { 
+                    has_next: response.data.data.has_next,
+                    has_prev: response.data.data.has_prev,
+                    next_cursor: response.data.data.next_cursor,
+                    prev_cursor: response.data.data.prev_cursor,
+                    limit: response.data.data.limit
+                }
+            } catch (err: any) {
+                this.error = err.response?.data?.message || err.message || 'Failed to fetch user'
+                throw err
+            } finally {
+                this.loading = false
+            }
+        },
+
     },
 })

@@ -19,6 +19,34 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   actions: {
+    async accountRequest(fname: string, lname: string, email: string, phone: string, country: string, website: string, postalAddress: string, postalCode: string, physicalLocation: string) {
+      this.loading = true
+      this.error = null
+      try {
+            const response = await axios.post('/account-request', { 
+                fname,
+                lname,
+                email,
+                phone,
+                country,
+                website,
+                postalAddress,
+                postalCode,
+                physicalLocation,
+            })
+            if (response.data.success) {
+                return response.data.data.message
+            } else {
+                throw new Error(response.data.message || 'Action failed')
+            }
+        } catch (err: any) {
+            this.error = err.response?.data?.message || err.message || 'Failed to send reset link'
+            throw err
+        } finally {
+            this.loading = false
+        }
+    },
+
     async login(email: string, password: string) {
       this.loading = true
       this.error = null

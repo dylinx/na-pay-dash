@@ -178,12 +178,22 @@ const router = createRouter({
       },
     },
 
+    {
+      path: '/activities',
+      name: 'Audit Trail',
+      component: () => import('../views/Others/UserActivities.vue'),
+      meta: {
+        title: 'Audit Trail',
+        requiresAuth: true
+      },
+    },
+
     // Helper Routes
 
     {
       path: '/blank',
       name: 'Blank',
-      component: () => import('../views/Pages/BlankPage.vue'),
+      component: () => import('../views/Others/BlankPage.vue'),
       meta: {
         title: 'Blank',
         requiresAuth: true

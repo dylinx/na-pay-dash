@@ -31,7 +31,7 @@
         <img
           v-if="isExpanded || isHovered || isMobileOpen"
           class="hidden dark:block"
-          src="/images/logo/logo-dark.svg"
+          src="/images/logo/auth-logo.svg"
           alt="Logo"
           width="150"
           height="40"
@@ -224,6 +224,7 @@ import {
   LinkIcon,
   ArrowsPointInIcon,
   ArrowsPointOutIcon,
+  ChevronUpDownIcon,
 } from "../../icons";
 import SidebarWidget from "./SidebarWidget.vue";
 import { useSidebar } from "@/composables/useSidebar";
@@ -283,6 +284,11 @@ const menuGroups = [
           { name: "Users", path: "/users" },
           { name: "Roles", path: "/roles" },
         ],
+      },
+      {
+        icon: ChevronUpDownIcon,
+        name: "Audit Trail",
+        path: "/activities",
       },
     ],
   },
