@@ -7,6 +7,7 @@
     >
       <AccountProfileCard />
       <ApiKeyCard />
+      <WebhookSettingsCard />
     </div>
   </AdminLayout>
 </template>
@@ -17,6 +18,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AccountProfileCard from '@/components/profile/AccountProfileCard.vue'
 import ApiKeyCard from '@/components/profile/ApiKeyCard.vue'
+import WebhookSettingsCard from '@/components/profile/WebhookSettingsCard.vue'
 
 const currentPageTitle = ref('Account Settings')
 </script>

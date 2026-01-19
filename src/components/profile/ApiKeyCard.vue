@@ -7,7 +7,7 @@
           Manage your API keys for programmatic access to your account.
         </p>
       </div>
-      <button @click="authStore.generateApiKey" :disabled="authStore.loading" class="edit-button">
+      <button v-if="canEdit" @click="settingsStore.generateApiKey" :disabled="settingsStore.loading" class="edit-button">
           <svg
             class="fill-current"
             width="18"
@@ -33,7 +33,7 @@
       enter-from-class="transform scale-95 opacity-0"
       enter-to-class="transform scale-100 opacity-100"
     >
-      <div v-if="authStore.apiKey" class="mt-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
+      <div v-if="settingsStore.apiKey" class="mt-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
         <div class="flex items-center justify-between mb-3">
           <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
             Your New API Key
@@ -46,7 +46,7 @@
         
         <div class="flex items-center gap-3">
           <div class="flex-1 font-mono text-sm p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg break-all text-gray-800 dark:text-white/90">
-            {{ authStore.apiKey }}
+            {{ settingsStore.apiKey }}
           </div>
           <button
             @click="copyApiKey"
@@ -77,26 +77,32 @@
       </div>
     </transition>
 
-    <div v-if="authStore.error" class="mt-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-sm text-red-600 dark:text-red-400 border border-red-100 dark:border-red-800/50 flex items-center gap-2">
+    <div v-if="settingsStore.error" class="mt-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-sm text-red-600 dark:text-red-400 border border-red-100 dark:border-red-800/50 flex items-center gap-2">
       <ErrorIcon class="h-4 w-4" />
-      {{ authStore.error }}
+      {{ settingsStore.error }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { PlusIcon, CheckIcon, InfoIcon, WarningIcon, ErrorIcon } from "@/icons"
 import { useAccountSettingsStore } from '@/stores/account_settings'
+import { useAuthStore } from '@/stores/auth'
 
-const authStore = useAccountSettingsStore()
+const settingsStore = useAccountSettingsStore()
+const authStore = useAuthStore()
 const copied = ref(false)
 
+const canEdit = computed(() => {
+  return authStore.metaData?.permissions?.includes('account-configs:crud')
+})
+
 const copyApiKey = async () => {
-  if (!authStore.apiKey) return
+  if (!settingsStore.apiKey) return
   
   try {
-    await navigator.clipboard.writeText(authStore.apiKey)
+    await navigator.clipboard.writeText(settingsStore.apiKey)
     copied.value = true
     setTimeout(() => {
       copied.value = false

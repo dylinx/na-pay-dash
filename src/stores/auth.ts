@@ -21,6 +21,14 @@ export const useAuthStore = defineStore('auth', {
         }
         return null
     })(),
+    accounts: ((): any => {
+        const meta = localStorage.getItem('np_metadata')
+        if (meta) {
+            const parsed = JSON.parse(meta)
+            return { data: parsed.accounts as [{mname: string, logo: string, mid: string, country: string, mainAccount: boolean, }]} // Wrap in data to match API response structure
+        }
+        return null
+    })(),
     metaData: JSON.parse(localStorage.getItem('np_metadata') || 'null'),
     loading: false,
     error: null as string | null,
@@ -233,6 +241,42 @@ export const useAuthStore = defineStore('auth', {
             }
         } catch (err: any) {
             this.error = err.response?.data?.error?.message || err.message || 'Failed to verify email'
+            throw err
+        } finally {
+            this.loading = false
+        }
+    },
+
+    async switchAccount(mid: string) {
+        this.loading = true
+        this.error = null
+        try {
+            const response = await axios.get(`/${mid}/account/switch`)
+            if (response.data.success) {
+                const data = response.data.data
+                localStorage.setItem('np_metadata', JSON.stringify({
+                    profile: {
+                        name: data.name,
+                        email: data.email || this.metaData?.profile?.email, // Keep email if not returned
+                        avatar: data.avatar || this.metaData?.profile?.avatar, // Keep avatar if not returned
+                    },
+                    accounts: data.accounts,
+                    currentMid: data.defaultMid,
+                    currentMidName: data.defaultMname,
+                    currentMidLogo: data.defaultLogo,
+                    currentMidCountry: data?.defaultCountry ?? this.metaData?.currentMidCountry ?? 'KE',
+                    permissions: data.permissions,
+                    isAdmin: data.isAdmin,
+                    timezone: data.timeZone, // Updated to match payload "timeZone"
+                }))
+                
+                // Reload the application to apply changes
+                window.location.reload()
+            } else {
+                throw new Error(response.data.message || 'Switching account failed')
+            }
+        } catch (err: any) {
+            this.error = err.response?.data?.message || err.message || 'Failed to switch account'
             throw err
         } finally {
             this.loading = false

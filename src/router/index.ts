@@ -144,25 +144,24 @@ const router = createRouter({
       },
     },
 
-    // Payment link Routes
+    // Invoices Routes
 
     {
-      path: '/single-use-links',
-      name: 'SingleUseLinks',
-      component: () => import('../views/PaymentLinks/SingleuseLink.vue'),
+      path: '/invoices',
+      name: 'Invoices',
+      component: () => import('../views/Invoices/Invoices.vue'),
       meta: {
-        title: 'Single Use Links',
+        title: 'Invoices',
         requiresAuth: true
       },
     },
 
     {
-      path: '/recurring-links',
-      name: 'RecurringLinks',
-      component: () => import('../views/PaymentLinks/RecurringLink.vue'),
+      path: '/invoice-payment',
+      name: 'InvoicePayment',
+      component: () => import('../views/Invoices/InvoicePayment.vue'),
       meta: {
-        title: 'Recurring Links',
-        requiresAuth: true
+        title: 'Invoice Payment',
       },
     },
 
